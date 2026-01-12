@@ -20,6 +20,7 @@ cat > "E1RMCalculator.xcodeproj/project.pbxproj" << 'PBXPROJ'
 		E1RM0022 /* RPEPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1RM0023; };
 		E1RM0024 /* ResultCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1RM0025; };
 		E1RM0026 /* TrainingPercentagesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1RM0027; };
+		E1RM0028 /* InfoCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1RM0029; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -32,6 +33,7 @@ cat > "E1RMCalculator.xcodeproj/project.pbxproj" << 'PBXPROJ'
 		E1RM0023 /* RPEPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RPEPickerView.swift; sourceTree = "<group>"; };
 		E1RM0025 /* ResultCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResultCardView.swift; sourceTree = "<group>"; };
 		E1RM0027 /* TrainingPercentagesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrainingPercentagesView.swift; sourceTree = "<group>"; };
+		E1RM0029 /* InfoCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InfoCardView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -59,7 +61,7 @@ cat > "E1RMCalculator.xcodeproj/project.pbxproj" << 'PBXPROJ'
 				E1RM0002 /* E1RMCalculatorApp.swift */,
 				E1RM0004 /* ContentView.swift */,
 				E1RM000E /* Models */,
-				E1RM0028 /* Views */,
+				E1RM0030 /* Views */,
 				E1RM0008 /* Assets.xcassets */,
 			);
 			path = E1RMCalculator;
@@ -81,21 +83,22 @@ cat > "E1RMCalculator.xcodeproj/project.pbxproj" << 'PBXPROJ'
 			path = Models;
 			sourceTree = "<group>";
 		};
-		E1RM0028 /* Views */ = {
+		E1RM0030 /* Views */ = {
 			isa = PBXGroup;
 			children = (
-				E1RM0029 /* Components */,
+				E1RM0031 /* Components */,
 			);
 			path = Views;
 			sourceTree = "<group>";
 		};
-		E1RM0029 /* Components */ = {
+		E1RM0031 /* Components */ = {
 			isa = PBXGroup;
 			children = (
 				E1RM0021 /* InputFieldsView.swift */,
 				E1RM0023 /* RPEPickerView.swift */,
 				E1RM0025 /* ResultCardView.swift */,
 				E1RM0027 /* TrainingPercentagesView.swift */,
+				E1RM0029 /* InfoCardView.swift */,
 			);
 			path = Components;
 			sourceTree = "<group>";
@@ -171,6 +174,7 @@ cat > "E1RMCalculator.xcodeproj/project.pbxproj" << 'PBXPROJ'
 				E1RM0022 /* RPEPickerView.swift in Sources */,
 				E1RM0024 /* ResultCardView.swift in Sources */,
 				E1RM0026 /* TrainingPercentagesView.swift in Sources */,
+				E1RM0028 /* InfoCardView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

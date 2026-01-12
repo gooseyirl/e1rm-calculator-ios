@@ -62,9 +62,21 @@ struct ContentView: View {
                     TrainingPercentagesView(oneRepMax: max)
                 }
 
+                // MARK: - Info Section
+                InfoCardView()
+
                 Spacer()
             }
             .padding(24)
+        }
+        .onTapGesture {
+            // Dismiss keyboard when tapping outside
+            UIApplication.shared.sendAction(
+                #selector(UIResponder.resignFirstResponder),
+                to: nil,
+                from: nil,
+                for: nil
+            )
         }
     }
 }
