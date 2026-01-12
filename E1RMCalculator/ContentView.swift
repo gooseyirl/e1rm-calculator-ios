@@ -58,6 +58,8 @@ struct ContentView: View {
                 // MARK: - Result Section
                 if let max = calculatedMax {
                     ResultCardView(oneRepMax: max)
+
+                    TrainingPercentagesView(oneRepMax: max)
                 }
 
                 Spacer()
