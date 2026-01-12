@@ -2,6 +2,7 @@ import SwiftUI
 
 struct TrainingPercentagesView: View {
     let oneRepMax: Double
+    @State private var customPercentage: String = ""
 
     private let percentages = [95, 90, 85, 80, 75, 70, 65, 60]
 
@@ -10,6 +11,29 @@ struct TrainingPercentagesView: View {
             // Header
             Text("Training Percentages")
                 .font(.system(size: 18, weight: .bold))
+
+            // Custom Percentage Calculator
+            HStack(spacing: 8) {
+                TextField("Custom %", text: $customPercentage)
+                    .keyboardType(.numberPad)
+                    .textFieldStyle(.roundedBorder)
+                    .frame(maxWidth: .infinity)
+
+                if let percentage = Int(customPercentage),
+                   percentage >= 1 && percentage <= 100 {
+                    VStack(spacing: 4) {
+                        Text("\(percentage)%")
+                            .font(.system(size: 16, weight: .bold))
+                        Text("\(calculatedWeight(for: percentage)) lbs/kg")
+                            .font(.system(size: 18, weight: .bold))
+                            .foregroundColor(.blue)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(12)
+                    .background(Color.teal.opacity(0.1))
+                    .cornerRadius(8)
+                }
+            }
 
             // Percentage Table
             VStack(spacing: 0) {
