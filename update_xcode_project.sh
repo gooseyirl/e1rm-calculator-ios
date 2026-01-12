@@ -1,3 +1,10 @@
+#!/bin/bash
+
+cd /Users/paulw/code/e1rm-calculator-ios
+
+# Update the project.pbxproj file to include new source files
+
+cat > "E1RMCalculator.xcodeproj/project.pbxproj" << 'PBXPROJ'
 // !$*UTF8*$!
 {
 	archiveVersion = 1;
@@ -364,3 +371,6 @@
 	};
 	rootObject = E1RM0013 /* Project object */;
 }
+PBXPROJ
+
+echo "Xcode project updated successfully!"

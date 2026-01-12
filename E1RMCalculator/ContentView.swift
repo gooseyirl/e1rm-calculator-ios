@@ -23,9 +23,10 @@ struct ContentView: View {
                 }
                 .padding(.top, 40)
 
-                // Placeholder for future content
-                Text("Input fields will go here")
-                    .foregroundColor(.secondary)
+                // MARK: - Input Section
+                InputFieldsView(weight: $weight, reps: $reps)
+
+                RPEPickerView(selectedRPE: $selectedRPE)
 
                 Spacer()
             }
