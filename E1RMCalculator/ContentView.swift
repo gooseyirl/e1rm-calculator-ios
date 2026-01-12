@@ -28,6 +28,38 @@ struct ContentView: View {
 
                 RPEPickerView(selectedRPE: $selectedRPE)
 
+                // MARK: - Calculate Button
+                Button(action: {
+                    if let w = Double(weight), let r = Int(reps) {
+                        calculatedMax = OneRepMaxCalculator.calculateOneRepMax(
+                            weight: w,
+                            reps: r,
+                            rpe: selectedRPE
+                        )
+                        // Dismiss keyboard
+                        UIApplication.shared.sendAction(
+                            #selector(UIResponder.resignFirstResponder),
+                            to: nil,
+                            from: nil,
+                            for: nil
+                        )
+                    }
+                }) {
+                    Text("Calculate 1RM")
+                        .font(.system(size: 18, weight: .medium))
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(weight.isEmpty || reps.isEmpty ? Color.gray : Color.blue)
+                        .foregroundColor(.white)
+                        .cornerRadius(10)
+                }
+                .disabled(weight.isEmpty || reps.isEmpty)
+
+                // MARK: - Result Section
+                if let max = calculatedMax {
+                    ResultCardView(oneRepMax: max)
+                }
+
                 Spacer()
             }
             .padding(24)
