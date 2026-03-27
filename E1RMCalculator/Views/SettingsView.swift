@@ -47,7 +47,7 @@ struct SettingsView: View {
                 Text("The nearest value all calculated weights are rounded to")
             }
 
-            Section("Rounding Direction") {
+            Section {
                 Picker("Rounding Direction", selection: Binding(
                     get: { selectedDirection },
                     set: { emitRounding(direction: $0) }
@@ -59,6 +59,8 @@ struct SettingsView: View {
                 .pickerStyle(.segmented)
                 .listRowBackground(Color.clear)
                 .listRowInsets(EdgeInsets(top: 8, leading: 0, bottom: 8, trailing: 0))
+            } header: {
+                Text("Rounding Direction")
             } footer: {
                 Text("Default rounds to the nearest increment")
             }
