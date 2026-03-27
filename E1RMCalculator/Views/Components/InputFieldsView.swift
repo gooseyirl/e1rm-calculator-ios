@@ -3,12 +3,13 @@ import SwiftUI
 struct InputFieldsView: View {
     @Binding var weight: String
     @Binding var reps: String
+    @EnvironmentObject var settings: AppSettings
 
     var body: some View {
         VStack(spacing: 16) {
             // Weight Input
             VStack(alignment: .leading, spacing: 4) {
-                Text("Weight (lbs/kg)")
+                Text("Weight (\(settings.units))")
                     .font(.subheadline)
                     .foregroundColor(.secondary)
 
@@ -43,5 +44,6 @@ struct InputFieldsView: View {
 
 #Preview {
     InputFieldsView(weight: .constant(""), reps: .constant(""))
+        .environmentObject(AppSettings())
         .padding()
 }

@@ -7,15 +7,21 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		E1RM0001 /* E1RMCalculatorApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1RM0002; };
-		E1RM0003 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1RM0004; };
-		E1RM0005 /* OneRepMaxCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1RM0006; };
-		E1RM0007 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E1RM0008; };
-		E1RM0020 /* InputFieldsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1RM0021; };
-		E1RM0022 /* RPEPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1RM0023; };
-		E1RM0024 /* ResultCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1RM0025; };
-		E1RM0026 /* TrainingPercentagesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1RM0027; };
-		E1RM0028 /* InfoCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1RM0029; };
+		E1RM0001 /* E1RMCalculatorApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1RM0002 /* E1RMCalculatorApp.swift */; };
+		E1RM0003 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1RM0004 /* ContentView.swift */; };
+		E1RM0005 /* OneRepMaxCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1RM0006 /* OneRepMaxCalculator.swift */; };
+		E1RM0007 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E1RM0008 /* Assets.xcassets */; };
+		E1RM0020 /* InputFieldsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1RM0021 /* InputFieldsView.swift */; };
+		E1RM0022 /* RPEPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1RM0023 /* RPEPickerView.swift */; };
+		E1RM0024 /* ResultCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1RM0025 /* ResultCardView.swift */; };
+		E1RM0026 /* TrainingPercentagesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1RM0027 /* TrainingPercentagesView.swift */; };
+		E1RM0028 /* InfoCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1RM0029 /* InfoCardView.swift */; };
+		E1RM0041 /* AppSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1RM0040 /* AppSettings.swift */; };
+		E1RM0043 /* WeightRounder.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1RM0042 /* WeightRounder.swift */; };
+		E1RM0045 /* MotivationalQuotes.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1RM0044 /* MotivationalQuotes.swift */; };
+		E1RM0047 /* StoreManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1RM0046 /* StoreManager.swift */; };
+		E1RM0049 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1RM0048 /* SettingsView.swift */; };
+		E1RM0051 /* SetsPlannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1RM0050 /* SetsPlannerView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -29,6 +35,12 @@
 		E1RM0025 /* ResultCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResultCardView.swift; sourceTree = "<group>"; };
 		E1RM0027 /* TrainingPercentagesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrainingPercentagesView.swift; sourceTree = "<group>"; };
 		E1RM0029 /* InfoCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InfoCardView.swift; sourceTree = "<group>"; };
+		E1RM0040 /* AppSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppSettings.swift; sourceTree = "<group>"; };
+		E1RM0042 /* WeightRounder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeightRounder.swift; sourceTree = "<group>"; };
+		E1RM0044 /* MotivationalQuotes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotivationalQuotes.swift; sourceTree = "<group>"; };
+		E1RM0046 /* StoreManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreManager.swift; sourceTree = "<group>"; };
+		E1RM0048 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		E1RM0050 /* SetsPlannerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetsPlannerView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -57,6 +69,7 @@
 				E1RM0004 /* ContentView.swift */,
 				E1RM000E /* Models */,
 				E1RM0030 /* Views */,
+				E1RM0052 /* Store */,
 				E1RM0008 /* Assets.xcassets */,
 			);
 			path = E1RMCalculator;
@@ -74,6 +87,9 @@
 			isa = PBXGroup;
 			children = (
 				E1RM0006 /* OneRepMaxCalculator.swift */,
+				E1RM0040 /* AppSettings.swift */,
+				E1RM0042 /* WeightRounder.swift */,
+				E1RM0044 /* MotivationalQuotes.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -82,6 +98,8 @@
 			isa = PBXGroup;
 			children = (
 				E1RM0031 /* Components */,
+				E1RM0048 /* SettingsView.swift */,
+				E1RM0050 /* SetsPlannerView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -98,12 +116,20 @@
 			path = Components;
 			sourceTree = "<group>";
 		};
+		E1RM0052 /* Store */ = {
+			isa = PBXGroup;
+			children = (
+				E1RM0046 /* StoreManager.swift */,
+			);
+			path = Store;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
 		E1RM000F /* E1RMCalculator */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = E1RM0010;
+			buildConfigurationList = E1RM0010 /* Build configuration list for PBXNativeTarget "E1RMCalculator" */;
 			buildPhases = (
 				E1RM0011 /* Sources */,
 				E1RM000A /* Frameworks */,
@@ -115,7 +141,7 @@
 			);
 			name = E1RMCalculator;
 			productName = E1RMCalculator;
-			productReference = E1RM0009;
+			productReference = E1RM0009 /* E1RMCalculator.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -128,7 +154,7 @@
 				LastSwiftUpdateCheck = 1500;
 				LastUpgradeCheck = 1500;
 			};
-			buildConfigurationList = E1RM0014;
+			buildConfigurationList = E1RM0014 /* Build configuration list for PBXProject "E1RMCalculator" */;
 			compatibilityVersion = "Xcode 14.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -170,6 +196,12 @@
 				E1RM0024 /* ResultCardView.swift in Sources */,
 				E1RM0026 /* TrainingPercentagesView.swift in Sources */,
 				E1RM0028 /* InfoCardView.swift in Sources */,
+				E1RM0041 /* AppSettings.swift in Sources */,
+				E1RM0043 /* WeightRounder.swift in Sources */,
+				E1RM0045 /* MotivationalQuotes.swift in Sources */,
+				E1RM0047 /* StoreManager.swift in Sources */,
+				E1RM0049 /* SettingsView.swift in Sources */,
+				E1RM0051 /* SetsPlannerView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -302,7 +334,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = RG72PZGLF9;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -330,7 +362,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = RG72PZGLF9;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;

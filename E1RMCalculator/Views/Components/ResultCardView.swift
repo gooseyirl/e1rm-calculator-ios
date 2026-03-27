@@ -2,6 +2,7 @@ import SwiftUI
 
 struct ResultCardView: View {
     let oneRepMax: Double
+    @EnvironmentObject var settings: AppSettings
 
     var body: some View {
         VStack(spacing: 8) {
@@ -9,11 +10,11 @@ struct ResultCardView: View {
                 .font(.system(size: 16))
                 .foregroundColor(.secondary)
 
-            Text("\(Int(oneRepMax.rounded()))")
+            Text(WeightRounder.format(oneRepMax, rounding: settings.rounding))
                 .font(.system(size: 48, weight: .bold))
                 .foregroundColor(.blue)
 
-            Text("lbs/kg")
+            Text(settings.units)
                 .font(.system(size: 14))
                 .foregroundColor(.secondary)
         }
@@ -26,5 +27,6 @@ struct ResultCardView: View {
 
 #Preview {
     ResultCardView(oneRepMax: 388.4)
+        .environmentObject(AppSettings())
         .padding()
 }

@@ -2,6 +2,7 @@ import SwiftUI
 
 struct TrainingPercentagesView: View {
     let oneRepMax: Double
+    @EnvironmentObject var settings: AppSettings
     @State private var customPercentage: String = ""
 
     private let percentages = [95, 90, 85, 80, 75, 70, 65, 60]
@@ -24,7 +25,7 @@ struct TrainingPercentagesView: View {
                     VStack(spacing: 4) {
                         Text("\(percentage)%")
                             .font(.system(size: 16, weight: .bold))
-                        Text("\(calculatedWeight(for: percentage)) lbs/kg")
+                        Text("\(formattedWeight(for: percentage)) \(settings.units)")
                             .font(.system(size: 18, weight: .bold))
                             .foregroundColor(.blue)
                     }
@@ -44,7 +45,7 @@ struct TrainingPercentagesView: View {
 
                         Spacer()
 
-                        Text("\(calculatedWeight(for: percentage)) lbs/kg")
+                        Text("\(formattedWeight(for: percentage)) \(settings.units)")
                             .font(.system(size: 16, weight: .bold))
                             .foregroundColor(.blue)
                     }
@@ -58,12 +59,14 @@ struct TrainingPercentagesView: View {
         }
     }
 
-    private func calculatedWeight(for percentage: Int) -> Int {
-        Int((oneRepMax * Double(percentage) / 100.0).rounded())
+    private func formattedWeight(for percentage: Int) -> String {
+        let raw = oneRepMax * Double(percentage) / 100.0
+        return WeightRounder.format(raw, rounding: settings.rounding)
     }
 }
 
 #Preview {
     TrainingPercentagesView(oneRepMax: 388.4)
+        .environmentObject(AppSettings())
         .padding()
 }
