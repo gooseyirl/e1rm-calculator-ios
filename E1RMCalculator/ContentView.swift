@@ -115,6 +115,14 @@ struct ContentView: View {
                     to: nil, from: nil, for: nil
                 )
             }
+            .alert("Purchase Unavailable", isPresented: Binding(
+                get: { storeManager.purchaseError != nil },
+                set: { if !$0 { storeManager.purchaseError = nil } }
+            )) {
+                Button("OK") { storeManager.purchaseError = nil }
+            } message: {
+                Text(storeManager.purchaseError ?? "")
+            }
         }
     }
 
