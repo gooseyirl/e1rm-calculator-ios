@@ -1,12 +1,17 @@
 import SwiftUI
 
-private struct BackoffConfig: Identifiable {
+// "RPE"    — weight from e1rm + RPE table
+// "%1RM"   — percentage of e1rm
+// "%last"  — percentage change from previous set's weight
+// "Weight" — explicit weight
+private struct SetConfig: Identifiable {
     let id: Int
     var numSets: String = "1"
-    var reps: String = ""
+    var reps: String = "5"
     var type: String = "RPE"
-    var rpe: Double = 7.0
-    var percentValue: String = "10"
+    var rpe: Double = 8.0
+    var percentE1rm: String = "80"
+    var percentDelta: String = "5"
     var percentIsIncrease: Bool = false
     var specificWeight: String = ""
 }
@@ -14,27 +19,41 @@ private struct BackoffConfig: Identifiable {
 private struct PlannedSet {
     let reps: Int
     let weight: Double
-    let rpe: Double?
 }
 
 struct SetsPlannerView: View {
+    let initialE1rm: Double?
+
     @EnvironmentObject var settings: AppSettings
 
-    @State private var topSetWeight: String = ""
-    @State private var topSetReps: String = ""
-    @State private var topSetRpe: Double = 8.0
-    @State private var backoffConfigs: [BackoffConfig] = [BackoffConfig(id: 0)]
-    @State private var plannedSets: [PlannedSet]? = nil
-    @State private var copied: Bool = false
+    @State private var e1rmInput: String
+    @State private var sets: [SetConfig] = [SetConfig(id: 0)]
     @State private var nextId: Int = 1
+    @State private var plannedSets: [PlannedSet]? = nil
+    @State private var generateError: String? = nil
+    @State private var copied: Bool = false
+    @State private var localRounding: String = "default_0_5"
     @State private var generateCount: Int = 0
 
     private let rpeValues = OneRepMaxCalculator.getSupportedRpeValues()
+
+    init(initialE1rm: Double? = nil) {
+        self.initialE1rm = initialE1rm
+        if let e1rm = initialE1rm {
+            let formatted = e1rm.truncatingRemainder(dividingBy: 1) == 0
+                ? String(format: "%.0f", e1rm)
+                : String(format: "%.1f", e1rm)
+            _e1rmInput = State(initialValue: formatted)
+        } else {
+            _e1rmInput = State(initialValue: "")
+        }
+    }
 
     var body: some View {
         ScrollViewReader { proxy in
             ScrollView {
                 VStack(alignment: .leading, spacing: 0) {
+
                     // Title
                     VStack(alignment: .leading, spacing: 8) {
                         Text("Sets Planner")
@@ -45,58 +64,57 @@ struct SetsPlannerView: View {
                             .foregroundColor(.secondary)
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.bottom, 32)
+                    .padding(.bottom, 24)
 
-                    // First Set
-                    Text("First Set")
-                        .font(.system(size: 18, weight: .bold))
-                        .padding(.bottom, 12)
+                    // ── E1RM ─────────────────────────────────────────────
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("E1RM")
+                            .font(.system(size: 15, weight: .semibold))
+                            .foregroundColor(.blue)
 
-                    TextField("Weight (\(settings.units))", text: $topSetWeight)
-                        .keyboardType(.decimalPad)
-                        .textFieldStyle(.roundedBorder)
-                        .padding(.bottom, 12)
-
-                    HStack(spacing: 12) {
-                        TextField("Reps", text: $topSetReps)
-                            .keyboardType(.numberPad)
+                        TextField("Estimated 1RM (\(settings.units)) — optional", text: $e1rmInput)
+                            .keyboardType(.decimalPad)
                             .textFieldStyle(.roundedBorder)
+                            .onChange(of: e1rmInput) { plannedSets = nil; generateError = nil }
 
-                        Picker("RPE", selection: $topSetRpe) {
-                            ForEach(rpeValues.reversed(), id: \.self) { rpe in
-                                Text(String(format: "RPE %.1f", rpe)).tag(rpe)
-                            }
+                        if !e1rmInput.isEmpty && Double(e1rmInput) == nil {
+                            Text("Enter a valid number")
+                                .font(.caption)
+                                .foregroundColor(.red)
+                        } else {
+                            Text("Required for RPE and % 1RM sets")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
                         }
-                        .pickerStyle(.menu)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 6)
-                        .background(Color(UIColor.systemGray6))
-                        .cornerRadius(8)
                     }
-                    .padding(.bottom, 28)
+                    .padding(16)
+                    .background(Color(UIColor.secondarySystemBackground))
+                    .cornerRadius(12)
+                    .padding(.bottom, 20)
 
-                    // Additional Sets
-                    Text("Additional Sets")
+                    // ── Sets ──────────────────────────────────────────────
+                    Text("Sets")
                         .font(.system(size: 18, weight: .bold))
                         .padding(.bottom, 8)
 
-                    ForEach($backoffConfigs) { $config in
-                        BackoffConfigCard(
+                    ForEach($sets) { $config in
+                        let index = sets.firstIndex(where: { $0.id == config.id }) ?? 0
+                        SetConfigCard(
                             config: $config,
-                            index: backoffConfigs.firstIndex(where: { $0.id == config.id }) ?? 0,
-                            canRemove: backoffConfigs.count > 1,
+                            index: index,
+                            canRemove: sets.count > 1,
                             units: settings.units,
                             rpeValues: rpeValues,
                             onRemove: {
-                                backoffConfigs.removeAll { $0.id == config.id }
+                                sets.removeAll { $0.id == config.id }
+                                plannedSets = nil
                             }
                         )
                         .padding(.bottom, 12)
                     }
 
                     Button(action: {
-                        let last = backoffConfigs.last ?? BackoffConfig(id: 0)
-                        backoffConfigs.append(BackoffConfig(id: nextId, numSets: last.numSets, reps: last.reps))
+                        sets.append(SetConfig(id: nextId))
                         nextId += 1
                     }) {
                         Text("+ Add Set")
@@ -108,28 +126,64 @@ struct SetsPlannerView: View {
                     }
                     .padding(.bottom, 8)
 
-                    // Generate Button
-                    Button(action: generateSets) {
+                    // ── Generate ──────────────────────────────────────────
+                    Button(action: doGenerate) {
                         Text("Generate Sets")
                             .font(.system(size: 18, weight: .medium))
                             .frame(maxWidth: .infinity)
                             .padding()
-                            .background(canGenerate ? Color.blue : Color.gray)
+                            .background(Color.blue)
                             .foregroundColor(.white)
                             .cornerRadius(10)
                     }
-                    .disabled(!canGenerate)
-                    .padding(.bottom, 24)
+                    .padding(.bottom, generateError != nil ? 8 : 0)
 
-                    // Results
+                    if let err = generateError {
+                        Text(err)
+                            .font(.system(size: 13))
+                            .foregroundColor(.red)
+                            .padding(.bottom, 8)
+                    }
+
+                    // ── Results ───────────────────────────────────────────
                     if let sets = plannedSets {
+                        // Rounding toggle — only shown after generation
+                        HStack(spacing: 8) {
+                            Text("Rounding")
+                                .font(.system(size: 14))
+                                .foregroundColor(.secondary)
+                            Spacer()
+                            ForEach(["0.5", "2.5"], id: \.self) { inc in
+                                let isSelected = inc == "2.5"
+                                    ? localRounding.hasSuffix("2_5")
+                                    : !localRounding.hasSuffix("2_5")
+                                Button(action: {
+                                    guard !isSelected else { return }
+                                    localRounding = inc == "2.5"
+                                        ? localRounding.replacingOccurrences(of: "0_5", with: "2_5")
+                                        : localRounding.replacingOccurrences(of: "2_5", with: "0_5")
+                                    doGenerate()
+                                }) {
+                                    Text("\(inc) \(settings.units)")
+                                        .font(.system(size: 13))
+                                        .padding(.horizontal, 12)
+                                        .padding(.vertical, 6)
+                                        .background(isSelected ? Color.blue : Color(UIColor.systemGray5))
+                                        .foregroundColor(isSelected ? .white : .primary)
+                                        .cornerRadius(16)
+                                }
+                            }
+                        }
+                        .padding(.top, 24)
+                        .padding(.bottom, 24)
+
                         let grouped = groupPlannedSets(sets)
 
                         VStack(spacing: 0) {
                             ForEach(Array(grouped.enumerated()), id: \.offset) { index, item in
                                 let (count, set) = item
                                 HStack {
-                                    Text(index == 0 ? "Set 1" : "Set \(index + 1)")
+                                    Text("Set \(index + 1)")
                                         .font(.system(size: 13))
                                         .foregroundColor(.secondary)
                                         .frame(maxWidth: .infinity, alignment: .leading)
@@ -138,7 +192,7 @@ struct SetsPlannerView: View {
                                         .font(.system(size: 15, weight: .bold))
                                         .frame(maxWidth: .infinity, alignment: .center)
 
-                                    Text("\(WeightRounder.format(set.weight, rounding: settings.rounding)) \(settings.units)")
+                                    Text("\(WeightRounder.format(set.weight, rounding: localRounding)) \(settings.units)")
                                         .font(.system(size: 15, weight: index == 0 ? .bold : .regular))
                                         .frame(maxWidth: .infinity, alignment: .trailing)
                                 }
@@ -179,48 +233,62 @@ struct SetsPlannerView: View {
         }
         .navigationTitle("Sets Planner")
         .navigationBarTitleDisplayMode(.inline)
+        .onAppear { localRounding = settings.rounding }
         .onTapGesture {
             UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
         }
     }
 
-    private var canGenerate: Bool {
-        !topSetWeight.isEmpty && !topSetReps.isEmpty
-    }
-
-    private func generateSets() {
+    private func doGenerate() {
         UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
-        guard let weight = Double(topSetWeight), let reps = Int(topSetReps) else { return }
-        let oneRepMax = OneRepMaxCalculator.calculateOneRepMax(weight: weight, reps: reps, rpe: topSetRpe)
+        generateError = nil
 
-        var sets: [PlannedSet] = [PlannedSet(reps: reps, weight: weight, rpe: topSetRpe)]
+        let e1rm = Double(e1rmInput)
+        var result: [PlannedSet] = []
+        var lastWeight: Double? = nil
 
-        for config in backoffConfigs {
-            guard let numSets = Int(config.numSets).map({ max(1, min(20, $0)) }) else { continue }
-            let bReps = Int(config.reps) ?? reps
+        for (index, config) in sets.enumerated() {
+            guard let reps = Int(config.reps), reps > 0 else {
+                generateError = "Set \(index + 1): enter a valid rep count"
+                return
+            }
+            let numSets = max(1, Int(config.numSets) ?? 1)
 
+            let weight: Double
             switch config.type {
             case "RPE":
-                guard let e1rm = oneRepMax,
-                      let bWeight = OneRepMaxCalculator.calculateWeightForReps(oneRepMax: e1rm, reps: bReps, rpe: config.rpe)
-                else { continue }
-                for _ in 0..<numSets { sets.append(PlannedSet(reps: bReps, weight: bWeight, rpe: config.rpe)) }
-
-            case "%":
-                guard let pct = Int(config.percentValue).map({ max(1, min(99, $0)) }) else { continue }
-                let factor = config.percentIsIncrease ? 1.0 + Double(pct) / 100.0 : 1.0 - Double(pct) / 100.0
-                let bWeight = sets.last!.weight * factor
-                for _ in 0..<numSets { sets.append(PlannedSet(reps: bReps, weight: bWeight, rpe: nil)) }
-
-            case "Weight":
-                guard let bWeight = Double(config.specificWeight) else { continue }
-                for _ in 0..<numSets { sets.append(PlannedSet(reps: bReps, weight: bWeight, rpe: nil)) }
-
-            default: break
+                guard let e1rm else { generateError = "Enter an E1RM to use RPE sets"; return }
+                guard let w = OneRepMaxCalculator.calculateWeightForReps(oneRepMax: e1rm, reps: reps, rpe: config.rpe) else {
+                    generateError = "Set \(index + 1): reps/RPE combination not in table"; return
+                }
+                weight = w
+            case "%1RM":
+                guard let e1rm else { generateError = "Enter an E1RM to use % 1RM sets"; return }
+                guard let pct = Double(config.percentE1rm) else {
+                    generateError = "Set \(index + 1): enter a valid percentage"; return
+                }
+                weight = e1rm * (pct / 100.0)
+            case "%last":
+                guard let prev = lastWeight else {
+                    generateError = "Set \(index + 1): no previous set to reference"; return
+                }
+                guard let delta = Double(config.percentDelta) else {
+                    generateError = "Set \(index + 1): enter a valid percentage"; return
+                }
+                weight = config.percentIsIncrease ? prev * (1 + delta / 100.0) : prev * (1 - delta / 100.0)
+            default: // "Weight"
+                guard let w = Double(config.specificWeight) else {
+                    generateError = "Set \(index + 1): enter a valid weight"; return
+                }
+                weight = w
             }
+
+            let rounded = WeightRounder.round(weight, rounding: localRounding)
+            for _ in 0..<numSets { result.append(PlannedSet(reps: reps, weight: rounded)) }
+            lastWeight = rounded
         }
 
-        plannedSets = sets
+        plannedSets = result
         copied = false
         generateCount += 1
     }
@@ -230,13 +298,12 @@ struct SetsPlannerView: View {
         var result: [(Int, PlannedSet)] = []
         var count = 1
         for i in 1..<sets.count {
-            let curr = sets[i]
-            let prev = sets[i - 1]
-            if curr.reps == prev.reps &&
-               WeightRounder.round(curr.weight, rounding: settings.rounding) == WeightRounder.round(prev.weight, rounding: settings.rounding) {
+            if sets[i].reps == sets[i - 1].reps &&
+               WeightRounder.round(sets[i].weight, rounding: localRounding) ==
+               WeightRounder.round(sets[i - 1].weight, rounding: localRounding) {
                 count += 1
             } else {
-                result.append((count, prev))
+                result.append((count, sets[i - 1]))
                 count = 1
             }
         }
@@ -246,13 +313,13 @@ struct SetsPlannerView: View {
 
     private func buildCopyText(_ sets: [PlannedSet]) -> String {
         groupPlannedSets(sets).map { (count, set) in
-            "\(count) x \(set.reps) @ \(WeightRounder.format(set.weight, rounding: settings.rounding))\(settings.units)"
+            "\(count) x \(set.reps) @ \(WeightRounder.format(set.weight, rounding: localRounding))\(settings.units)"
         }.joined(separator: "\n")
     }
 }
 
-private struct BackoffConfigCard: View {
-    @Binding var config: BackoffConfig
+private struct SetConfigCard: View {
+    @Binding var config: SetConfig
     let index: Int
     let canRemove: Bool
     let units: String
@@ -261,8 +328,10 @@ private struct BackoffConfigCard: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
+
+            // Header
             HStack {
-                Text("Set \(index + 2)")
+                Text("Set \(index + 1)")
                     .font(.system(size: 15, weight: .semibold))
                 Spacer()
                 if canRemove {
@@ -272,6 +341,7 @@ private struct BackoffConfigCard: View {
                 }
             }
 
+            // Sets × Reps
             HStack(spacing: 12) {
                 VStack(alignment: .leading, spacing: 4) {
                     Text("Sets").font(.caption).foregroundColor(.secondary)
@@ -279,30 +349,30 @@ private struct BackoffConfigCard: View {
                         .keyboardType(.numberPad)
                         .textFieldStyle(.roundedBorder)
                 }
-
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("Reps (blank = same)").font(.caption).foregroundColor(.secondary)
+                    Text("Reps").font(.caption).foregroundColor(.secondary)
                     TextField("Reps", text: $config.reps)
                         .keyboardType(.numberPad)
                         .textFieldStyle(.roundedBorder)
                 }
             }
 
-            // Type selector
-            HStack(spacing: 8) {
-                ForEach(["RPE", "%", "Weight"], id: \.self) { type in
+            // Type chips: RPE | % 1RM | % last | Weight
+            HStack(spacing: 6) {
+                ForEach(["RPE", "%1RM", "%last", "Weight"], id: \.self) { type in
                     let chipLabel: String = {
-                        if type == "%" && config.type == "%" {
+                        switch type {
+                        case "%1RM": return "% 1RM"
+                        case "%last" where config.type == "%last":
                             return config.percentIsIncrease ? "% +" : "% -"
-                        } else if type == "%" {
-                            return "% -"
+                        case "%last": return "% last"
+                        default: return type
                         }
-                        return type
                     }()
                     let isSelected = config.type == type
 
                     Button(action: {
-                        if config.type == "%" && type == "%" {
+                        if config.type == "%last" && type == "%last" {
                             config.percentIsIncrease.toggle()
                         } else {
                             config.type = type
@@ -310,8 +380,8 @@ private struct BackoffConfigCard: View {
                         }
                     }) {
                         Text(chipLabel)
-                            .font(.system(size: 13))
-                            .padding(.horizontal, 12)
+                            .font(.system(size: 12))
+                            .padding(.horizontal, 8)
                             .padding(.vertical, 6)
                             .frame(maxWidth: .infinity)
                             .background(isSelected ? Color.blue : Color(UIColor.systemGray5))
@@ -335,17 +405,34 @@ private struct BackoffConfigCard: View {
                 .background(Color(UIColor.systemGray6))
                 .cornerRadius(8)
 
-            case "%":
-                TextField(config.percentIsIncrease ? "% Increase per Set" : "% Reduction per Set", text: $config.percentValue)
-                    .keyboardType(.numberPad)
-                    .textFieldStyle(.roundedBorder)
+            case "%1RM":
+                HStack {
+                    TextField("% of E1RM", text: $config.percentE1rm)
+                        .keyboardType(.decimalPad)
+                        .textFieldStyle(.roundedBorder)
+                    Text("%").foregroundColor(.secondary)
+                }
 
-            case "Weight":
-                TextField("Specific Weight (\(units))", text: $config.specificWeight)
+            case "%last":
+                VStack(alignment: .leading, spacing: 4) {
+                    HStack {
+                        TextField(
+                            config.percentIsIncrease ? "% increase from last set" : "% reduction from last set",
+                            text: $config.percentDelta
+                        )
+                        .keyboardType(.decimalPad)
+                        .textFieldStyle(.roundedBorder)
+                        Text("%").foregroundColor(.secondary)
+                    }
+                    Text("Tap the chip again to toggle + / −")
+                        .font(.system(size: 11))
+                        .foregroundColor(.secondary)
+                }
+
+            default: // "Weight"
+                TextField("Weight (\(units))", text: $config.specificWeight)
                     .keyboardType(.decimalPad)
                     .textFieldStyle(.roundedBorder)
-
-            default: EmptyView()
             }
         }
         .padding(16)

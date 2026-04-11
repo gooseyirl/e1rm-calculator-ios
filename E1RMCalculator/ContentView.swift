@@ -86,7 +86,7 @@ struct ContentView: View {
                 case .settings:
                     SettingsView()
                 case .setsPlanner:
-                    SetsPlannerView()
+                    SetsPlannerView(initialE1rm: calculatedMax)
                 }
             }
             .toolbar {
