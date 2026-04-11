@@ -19,12 +19,12 @@ struct TrainingPercentagesView: View {
                     .font(.system(size: 15, weight: .semibold))
                     .foregroundColor(.blue)
 
-                if let percentage = Int(customPercentage), percentage >= 1 && percentage <= 100 {
-                    HStack(spacing: 12) {
-                        TextField("Enter percentage", text: $customPercentage)
-                            .keyboardType(.numberPad)
-                            .textFieldStyle(.roundedBorder)
+                HStack(spacing: 12) {
+                    TextField("Enter percentage", text: $customPercentage)
+                        .keyboardType(.numberPad)
+                        .textFieldStyle(.roundedBorder)
 
+                    if let percentage = Int(customPercentage), percentage >= 1 && percentage <= 100 {
                         VStack(spacing: 2) {
                             Text("\(percentage)%")
                                 .font(.system(size: 14, weight: .semibold))
@@ -38,10 +38,6 @@ struct TrainingPercentagesView: View {
                         .background(Color.blue.opacity(0.1))
                         .cornerRadius(10)
                     }
-                } else {
-                    TextField("Enter percentage", text: $customPercentage)
-                        .keyboardType(.numberPad)
-                        .textFieldStyle(.roundedBorder)
                 }
             }
             .padding(16)
