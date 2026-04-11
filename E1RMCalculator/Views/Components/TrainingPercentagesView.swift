@@ -14,27 +14,39 @@ struct TrainingPercentagesView: View {
                 .font(.system(size: 18, weight: .bold))
 
             // Custom Percentage Calculator
-            HStack(spacing: 8) {
-                TextField("Custom %", text: $customPercentage)
-                    .keyboardType(.numberPad)
-                    .textFieldStyle(.roundedBorder)
-                    .frame(maxWidth: .infinity)
+            VStack(alignment: .leading, spacing: 10) {
+                Text("Custom %")
+                    .font(.system(size: 15, weight: .semibold))
+                    .foregroundColor(.blue)
 
-                if let percentage = Int(customPercentage),
-                   percentage >= 1 && percentage <= 100 {
-                    VStack(spacing: 4) {
-                        Text("\(percentage)%")
-                            .font(.system(size: 16, weight: .bold))
-                        Text("\(formattedWeight(for: percentage)) \(settings.units)")
-                            .font(.system(size: 18, weight: .bold))
-                            .foregroundColor(.blue)
+                HStack(spacing: 12) {
+                    TextField("Enter percentage", text: $customPercentage)
+                        .keyboardType(.numberPad)
+                        .textFieldStyle(.roundedBorder)
+
+                    if let percentage = Int(customPercentage),
+                       percentage >= 1 && percentage <= 100 {
+                        VStack(spacing: 2) {
+                            Text("\(percentage)%")
+                                .font(.system(size: 14, weight: .semibold))
+                                .foregroundColor(.secondary)
+                            Text("\(formattedWeight(for: percentage)) \(settings.units)")
+                                .font(.system(size: 18, weight: .bold))
+                                .foregroundColor(.blue)
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 10)
+                        .background(Color.blue.opacity(0.1))
+                        .cornerRadius(10)
+                    } else {
+                        Color.clear
+                            .frame(maxWidth: .infinity)
                     }
-                    .frame(maxWidth: .infinity)
-                    .padding(12)
-                    .background(Color.teal.opacity(0.1))
-                    .cornerRadius(8)
                 }
             }
+            .padding(16)
+            .background(Color(UIColor.secondarySystemBackground))
+            .cornerRadius(12)
 
             // Percentage Table
             VStack(spacing: 0) {
