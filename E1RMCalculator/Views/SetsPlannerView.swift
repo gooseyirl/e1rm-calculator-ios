@@ -5,7 +5,7 @@ import SwiftUI
 // "%last"  — percentage change from previous set's weight
 // "Weight" — explicit weight
 private struct SetConfig: Identifiable {
-    let id: Int
+    var id: Int
     var numSets: String = "1"
     var reps: String = "5"
     var type: String = "RPE"
