@@ -114,7 +114,9 @@ struct SetsPlannerView: View {
                     }
 
                     Button(action: {
-                        sets.append(SetConfig(id: nextId))
+                        var newSet = sets.last ?? SetConfig(id: nextId)
+                        newSet.id = nextId
+                        sets.append(newSet)
                         nextId += 1
                     }) {
                         Text("+ Add Set")
