@@ -76,6 +76,10 @@ struct RPEPickerView: View {
             return "Could do 3-4 more reps"
         case 6.0:
             return "Could definitely do 4 more reps"
+        case 5.5:
+            return "Could do 4-5 more reps"
+        case 5.0:
+            return "Could definitely do 5 more reps"
         default:
             return "Unknown RPE"
         }

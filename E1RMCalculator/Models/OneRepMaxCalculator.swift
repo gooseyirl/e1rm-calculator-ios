@@ -28,7 +28,11 @@ struct OneRepMaxCalculator {
         // RPE 6.5 (3.5 RIR)
         6.5: [1: 87.8, 2: 85.0, 3: 82.4, 4: 79.9, 5: 77.4, 6: 75.1, 7: 72.9, 8: 70.7, 9: 68.6, 10: 66.6],
         // RPE 6 (4 RIR)
-        6.0: [1: 86.3, 2: 83.7, 3: 81.1, 4: 78.6, 5: 76.2, 6: 74.0, 7: 71.8, 8: 69.7, 9: 67.6, 10: 65.6]
+        6.0: [1: 86.3, 2: 83.7, 3: 81.1, 4: 78.6, 5: 76.2, 6: 74.0, 7: 71.8, 8: 69.7, 9: 67.6, 10: 65.6],
+        // RPE 5.5 (4.5 RIR)
+        5.5: [1: 84.8, 2: 82.4, 3: 79.8, 4: 77.3, 5: 75.0, 6: 72.9, 7: 70.7, 8: 68.7, 9: 66.6, 10: 64.6],
+        // RPE 5 (5 RIR)
+        5.0: [1: 83.3, 2: 81.1, 3: 78.5, 4: 76.0, 5: 73.8, 6: 71.8, 7: 69.6, 8: 67.7, 9: 65.6, 10: 63.6]
     ]
 
     /**
@@ -44,7 +48,7 @@ struct OneRepMaxCalculator {
         // Validate inputs
         guard weight > 0 else { return nil }
         guard reps >= 1 && reps <= 10 else { return nil }
-        guard rpe >= 6.0 && rpe <= 10.0 else { return nil }
+        guard rpe >= 5.0 && rpe <= 10.0 else { return nil }
 
         // Get the percentage from the RPE table
         guard let rpeRow = rpePercentageTable[rpe],
@@ -67,7 +71,7 @@ struct OneRepMaxCalculator {
      */
     static func calculateRepsAtWeight(oneRepMax: Double, weight: Double, rpe: Double) -> Int? {
         guard oneRepMax > 0 && weight > 0 && weight <= oneRepMax else { return nil }
-        guard rpe >= 6.0 && rpe <= 10.0 else { return nil }
+        guard rpe >= 5.0 && rpe <= 10.0 else { return nil }
 
         let percentageOfMax = (weight / oneRepMax) * 100.0
         guard let rpeRow = rpePercentageTable[rpe] else { return nil }
@@ -106,7 +110,7 @@ struct OneRepMaxCalculator {
     static func calculateWeightForReps(oneRepMax: Double, reps: Int, rpe: Double) -> Double? {
         guard oneRepMax > 0 else { return nil }
         guard reps >= 1 && reps <= 10 else { return nil }
-        guard rpe >= 6.0 && rpe <= 10.0 else { return nil }
+        guard rpe >= 5.0 && rpe <= 10.0 else { return nil }
 
         guard let rpeRow = rpePercentageTable[rpe],
               let percentageOfMax = rpeRow[reps] else {
