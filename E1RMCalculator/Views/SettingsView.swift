@@ -2,6 +2,7 @@ import SwiftUI
 
 struct SettingsView: View {
     @EnvironmentObject var settings: AppSettings
+    @AppStorage("theme_preference") private var themePreference: String = "system"
 
     private var selectedIncrement: String {
         settings.rounding.hasSuffix("2_5") ? "2.5" : "0.5"
@@ -20,6 +21,17 @@ struct SettingsView: View {
 
     var body: some View {
         Form {
+            Section("Appearance") {
+                Picker("Theme", selection: $themePreference) {
+                    Text("System").tag("system")
+                    Text("Light").tag("light")
+                    Text("Dark").tag("dark")
+                }
+                .pickerStyle(.segmented)
+                .listRowBackground(Color.clear)
+                .listRowInsets(EdgeInsets(top: 8, leading: 0, bottom: 8, trailing: 0))
+            }
+
             Section("Units of Measurement") {
                 Picker("Units", selection: $settings.units) {
                     Text("kg").tag("kg")
