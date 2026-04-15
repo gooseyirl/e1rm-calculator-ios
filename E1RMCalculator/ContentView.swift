@@ -5,8 +5,8 @@ struct ContentView: View {
     @EnvironmentObject var storeManager: StoreManager
 
     @State private var weight: String = ""
-    @State private var reps: String = ""
-    @State private var selectedRPE: Double = 8.0
+    @State private var reps: String = "1"
+    @State private var selectedRPE: Double = 10.0
     @State private var calculatedMax: Double? = nil
     @State private var path: [AppScreen] = []
     @State private var dailyQuote: String = MotivationalQuotes.nextQuote()
