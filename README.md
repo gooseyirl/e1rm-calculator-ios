@@ -1,5 +1,8 @@
 # E1RM Calculator - iOS
 
+> **⚠️ This repository is no longer maintained.**
+> The iOS app has moved to the unified [e1rm-calculator](https://github.com/gooseyirl/e1rm-calculator) repository alongside the Android app. All future development happens there.
+
 One Rep Max Calculator using RPE (Rate of Perceived Exertion) for iOS.
 
 ## Overview
