@@ -53,177 +53,11 @@ struct SetsPlannerView: View {
         ScrollViewReader { proxy in
             ScrollView {
                 VStack(alignment: .leading, spacing: 0) {
-
-                    // Title
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("Sets Planner")
-                            .font(.system(size: 32, weight: .bold))
-                            .foregroundColor(.blue)
-                        Text("Plan your sets")
-                            .font(.system(size: 16))
-                            .foregroundColor(.secondary)
-                    }
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.bottom, 24)
-
-                    // ── E1RM ─────────────────────────────────────────────
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("E1RM")
-                            .font(.system(size: 15, weight: .semibold))
-                            .foregroundColor(.blue)
-
-                        TextField("Estimated 1RM (\(settings.units)) — optional", text: $e1rmInput)
-                            .keyboardType(.decimalPad)
-                            .textFieldStyle(.roundedBorder)
-                            .onChange(of: e1rmInput) { plannedSets = nil; generateError = nil }
-
-                        if !e1rmInput.isEmpty && Double(e1rmInput) == nil {
-                            Text("Enter a valid number")
-                                .font(.caption)
-                                .foregroundColor(.red)
-                        } else {
-                            Text("Required for RPE and % 1RM sets")
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                        }
-                    }
-                    .padding(16)
-                    .background(Color(UIColor.secondarySystemBackground))
-                    .cornerRadius(12)
-                    .padding(.bottom, 20)
-
-                    // ── Sets ──────────────────────────────────────────────
-                    Text("Sets")
-                        .font(.system(size: 18, weight: .bold))
-                        .padding(.bottom, 8)
-
-                    ForEach($sets) { $config in
-                        let index = sets.firstIndex(where: { $0.id == config.id }) ?? 0
-                        SetConfigCard(
-                            config: $config,
-                            index: index,
-                            canRemove: sets.count > 1,
-                            units: settings.units,
-                            rpeValues: rpeValues,
-                            onRemove: {
-                                sets.removeAll { $0.id == config.id }
-                                plannedSets = nil
-                            }
-                        )
-                        .padding(.bottom, 12)
-                    }
-
-                    Button(action: {
-                        var newSet = sets.last ?? SetConfig(id: nextId)
-                        newSet.id = nextId
-                        sets.append(newSet)
-                        nextId += 1
-                    }) {
-                        Text("+ Add Set")
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 10)
-                            .background(Color(UIColor.systemBackground))
-                            .foregroundColor(.blue)
-                            .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.blue, lineWidth: 1))
-                    }
-                    .padding(.bottom, 8)
-
-                    // ── Generate ──────────────────────────────────────────
-                    Button(action: doGenerate) {
-                        Text("Generate Sets")
-                            .font(.system(size: 18, weight: .medium))
-                            .frame(maxWidth: .infinity)
-                            .padding()
-                            .background(Color.blue)
-                            .foregroundColor(.white)
-                            .cornerRadius(10)
-                    }
-                    .padding(.bottom, generateError != nil ? 8 : 0)
-
-                    if let err = generateError {
-                        Text(err)
-                            .font(.system(size: 13))
-                            .foregroundColor(.red)
-                            .padding(.bottom, 8)
-                    }
-
-                    // ── Results ───────────────────────────────────────────
-                    if let sets = plannedSets {
-                        // Rounding toggle — only shown after generation
-                        HStack(spacing: 8) {
-                            Text("Rounding")
-                                .font(.system(size: 14))
-                                .foregroundColor(.secondary)
-                            Spacer()
-                            ForEach(["0.5", "2.5"], id: \.self) { inc in
-                                let isSelected = inc == "2.5"
-                                    ? localRounding.hasSuffix("2_5")
-                                    : !localRounding.hasSuffix("2_5")
-                                Button(action: {
-                                    guard !isSelected else { return }
-                                    localRounding = inc == "2.5"
-                                        ? localRounding.replacingOccurrences(of: "0_5", with: "2_5")
-                                        : localRounding.replacingOccurrences(of: "2_5", with: "0_5")
-                                    doGenerate()
-                                }) {
-                                    Text("\(inc) \(settings.units)")
-                                        .font(.system(size: 13))
-                                        .padding(.horizontal, 12)
-                                        .padding(.vertical, 6)
-                                        .background(isSelected ? Color.blue : Color(UIColor.systemGray5))
-                                        .foregroundColor(isSelected ? .white : .primary)
-                                        .cornerRadius(16)
-                                }
-                            }
-                        }
-                        .padding(.top, 24)
-                        .padding(.bottom, 24)
-
-                        let grouped = groupPlannedSets(sets)
-
-                        VStack(spacing: 0) {
-                            ForEach(Array(grouped.enumerated()), id: \.offset) { index, item in
-                                let (count, set) = item
-                                HStack {
-                                    Text("Set \(index + 1)")
-                                        .font(.system(size: 13))
-                                        .foregroundColor(.secondary)
-                                        .frame(maxWidth: .infinity, alignment: .leading)
-
-                                    Text("\(count)×\(set.reps)")
-                                        .font(.system(size: 15, weight: .bold))
-                                        .frame(maxWidth: .infinity, alignment: .center)
-
-                                    Text("\(WeightRounder.format(set.weight, rounding: localRounding)) \(settings.units)")
-                                        .font(.system(size: 15, weight: index == 0 ? .bold : .regular))
-                                        .frame(maxWidth: .infinity, alignment: .trailing)
-                                }
-                                .padding(.vertical, 8)
-                                .padding(.horizontal, 16)
-
-                                if index < grouped.count - 1 {
-                                    Divider().padding(.horizontal, 16)
-                                }
-                            }
-                        }
-                        .background(Color.blue.opacity(0.08))
-                        .cornerRadius(12)
-                        .padding(.bottom, 12)
-
-                        Button(action: {
-                            UIPasteboard.general.string = buildCopyText(sets)
-                            copied = true
-                        }) {
-                            Text(copied ? "✓ Copied!" : "Copy to Clipboard")
-                                .frame(maxWidth: .infinity)
-                                .padding()
-                                .background(copied ? Color(UIColor.systemGreen) : Color.blue)
-                                .foregroundColor(.white)
-                                .cornerRadius(10)
-                        }
-                        .id("bottom")
-                        .padding(.bottom, 32)
-                    }
+                    titleSection
+                    e1rmSection
+                    setsSection
+                    generateSection
+                    resultsSection
                 }
                 .padding(24)
                 .onChange(of: generateCount) {
@@ -238,6 +72,187 @@ struct SetsPlannerView: View {
         .onAppear { localRounding = settings.rounding }
         .onTapGesture {
             UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+        }
+    }
+
+    @ViewBuilder private var titleSection: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("Sets Planner")
+                .font(.system(size: 32, weight: .bold))
+                .foregroundColor(.blue)
+            Text("Plan your sets")
+                .font(.system(size: 16))
+                .foregroundColor(.secondary)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.bottom, 24)
+    }
+
+    @ViewBuilder private var e1rmSection: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("E1RM")
+                .font(.system(size: 15, weight: .semibold))
+                .foregroundColor(.blue)
+
+            TextField("Estimated 1RM (\(settings.units)) — optional", text: $e1rmInput)
+                .keyboardType(.decimalPad)
+                .textFieldStyle(.roundedBorder)
+                .onChange(of: e1rmInput) { plannedSets = nil; generateError = nil }
+
+            if !e1rmInput.isEmpty && Double(e1rmInput) == nil {
+                Text("Enter a valid number")
+                    .font(.caption)
+                    .foregroundColor(.red)
+            } else {
+                Text("Required for RPE and % 1RM sets")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+        }
+        .padding(16)
+        .background(Color(UIColor.secondarySystemBackground))
+        .cornerRadius(12)
+        .padding(.bottom, 20)
+    }
+
+    @ViewBuilder private var setsSection: some View {
+        Text("Sets")
+            .font(.system(size: 18, weight: .bold))
+            .padding(.bottom, 8)
+
+        ForEach($sets) { $config in
+            let index = sets.firstIndex(where: { $0.id == config.id }) ?? 0
+            SetConfigCard(
+                config: $config,
+                index: index,
+                canRemove: sets.count > 1,
+                units: settings.units,
+                rpeValues: rpeValues,
+                onRemove: {
+                    sets.removeAll { $0.id == config.id }
+                    plannedSets = nil
+                }
+            )
+            .padding(.bottom, 12)
+        }
+
+        Button(action: {
+            var newSet = sets.last ?? SetConfig(id: nextId)
+            newSet.id = nextId
+            sets.append(newSet)
+            nextId += 1
+        }) {
+            Text("+ Add Set")
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 10)
+                .background(Color(UIColor.systemBackground))
+                .foregroundColor(.blue)
+                .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.blue, lineWidth: 1))
+        }
+        .padding(.bottom, 8)
+    }
+
+    @ViewBuilder private var generateSection: some View {
+        Button(action: doGenerate) {
+            Text("Generate Sets")
+                .font(.system(size: 18, weight: .medium))
+                .frame(maxWidth: .infinity)
+                .padding()
+                .background(Color.blue)
+                .foregroundColor(.white)
+                .cornerRadius(10)
+        }
+        .padding(.bottom, generateError != nil ? 8 : 0)
+
+        if let err = generateError {
+            Text(err)
+                .font(.system(size: 13))
+                .foregroundColor(.red)
+                .padding(.bottom, 8)
+        }
+    }
+
+    @ViewBuilder private var resultsSection: some View {
+        if let sets = plannedSets {
+            roundingToggle
+            resultsTable(sets: sets)
+            copyButton(sets: sets)
+                .id("bottom")
+                .padding(.bottom, 32)
+        }
+    }
+
+    @ViewBuilder private var roundingToggle: some View {
+        HStack(spacing: 8) {
+            Text("Rounding")
+                .font(.system(size: 14))
+                .foregroundColor(.secondary)
+            Spacer()
+            ForEach(["0.5", "2.5"], id: \.self) { inc in
+                let isSelected = inc == "2.5"
+                    ? localRounding.hasSuffix("2_5")
+                    : !localRounding.hasSuffix("2_5")
+                Button(action: {
+                    guard !isSelected else { return }
+                    localRounding = inc == "2.5"
+                        ? localRounding.replacingOccurrences(of: "0_5", with: "2_5")
+                        : localRounding.replacingOccurrences(of: "2_5", with: "0_5")
+                    doGenerate()
+                }) {
+                    Text("\(inc) \(settings.units)")
+                        .font(.system(size: 13))
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 6)
+                        .background(isSelected ? Color.blue : Color(UIColor.systemGray5))
+                        .foregroundColor(isSelected ? .white : .primary)
+                        .cornerRadius(16)
+                }
+            }
+        }
+        .padding(.top, 24)
+        .padding(.bottom, 24)
+    }
+
+    @ViewBuilder private func resultsTable(sets: [PlannedSet]) -> some View {
+        let grouped = groupPlannedSets(sets)
+        VStack(spacing: 0) {
+            ForEach(Array(grouped.enumerated()), id: \.offset) { index, item in
+                let (count, set) = item
+                HStack {
+                    Text("Set \(index + 1)")
+                        .font(.system(size: 13))
+                        .foregroundColor(.secondary)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    Text("\(count)×\(set.reps)")
+                        .font(.system(size: 15, weight: .bold))
+                        .frame(maxWidth: .infinity, alignment: .center)
+                    Text("\(WeightRounder.format(set.weight, rounding: localRounding)) \(settings.units)")
+                        .font(.system(size: 15, weight: index == 0 ? .bold : .regular))
+                        .frame(maxWidth: .infinity, alignment: .trailing)
+                }
+                .padding(.vertical, 8)
+                .padding(.horizontal, 16)
+                if index < grouped.count - 1 {
+                    Divider().padding(.horizontal, 16)
+                }
+            }
+        }
+        .background(Color.blue.opacity(0.08))
+        .cornerRadius(12)
+        .padding(.bottom, 12)
+    }
+
+    @ViewBuilder private func copyButton(sets: [PlannedSet]) -> some View {
+        Button(action: {
+            UIPasteboard.general.string = buildCopyText(sets)
+            copied = true
+        }) {
+            Text(copied ? "✓ Copied!" : "Copy to Clipboard")
+                .frame(maxWidth: .infinity)
+                .padding()
+                .background(copied ? Color(UIColor.systemGreen) : Color.blue)
+                .foregroundColor(.white)
+                .cornerRadius(10)
         }
     }
 
